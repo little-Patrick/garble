@@ -1,7 +1,15 @@
 use crate::models::Login;
+use crate::garble::poly_cypher;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Fields {
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Page {
+    Home,
+    Add,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum InputField {
     Site,
     Username,
     Pin,
@@ -9,40 +17,53 @@ pub enum Fields {
 }
 
 pub struct App {
+    pub current_page: Page,
     pub logins: Vec<Login>,
-    // Current text buffer for the active field
-    pub input: String,
-    // Which field is currently active
-    pub input_field: Fields,
-    // Draft values collected across fields before final submission
-    pub current_site: String,
-    pub current_username: String,
-    pub current_pin: String,
-    pub current_password: String,
-    // Optional error message to show in UI
-    pub error: Option<String>,
+    pub site_input: String,
+    pub username_input: String,
+    pub pin_input: String,
+    pub password_input: String,
+    pub active_field: InputField,
 }
 
 impl App {
-    pub fn new(logins: Vec<Login>) -> Self {
+    pub fn new() -> Self {
         Self {
-            logins,
-            input: String::new(),
-            input_field: Fields::Site,
-            current_site: String::new(),
-            current_username: String::new(),
-            current_pin: String::new(),
-            current_password: String::new(),
-            error: None,
+            current_page: Page::Home,
+            logins: Vec::new(),
+            site_input: String::new(),
+            username_input: String::new(),
+            pin_input: String::new(),
+            password_input: String::new(),
+            active_field: InputField::Site,
         }
     }
-    pub fn clear_draft(&mut self) {
-        self.current_site.clear();
-        self.current_username.clear();
-        self.current_pin.clear();
-        self.current_password.clear();
-        self.input.clear();
-        self.input_field = Fields::Site;
+
+    pub fn clear_form(&mut self) {
+        self.site_input.clear();
+        self.username_input.clear();
+        self.pin_input.clear();
+        self.password_input.clear();
+        self.active_field = InputField::Site;
+    }
+
+    pub fn add_login(&mut self) {
+       // Error handling for Pin login or any other field 
+       let password = &self.password_input;
+       let pin = &self.pin_input;
+       let garbled = match poly_cypher(password, pin) {
+        Ok(garbled) => garbled,
+        Err(_) => return 
+       };
+
+       let login = Login {
+           site: self.site_input.clone(),
+           username: self.username_input.clone(),
+           pin: self.pin_input.clone(),
+           password: self.password_input.clone(),
+           garbled: garbled,
+       };
+
+       self.logins.push(login);
     }
 }
-
