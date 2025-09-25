@@ -22,7 +22,7 @@ impl Lane {
 }
 
 #[derive(Debug)]
-enum CipherError {
+pub enum CipherError {
     InvalidPinLength,
     NonDigitInPin,
     ParseError,

@@ -1,5 +1,5 @@
 pub mod poly;
-mod poly_prac;
 mod stream;
-pub use poly::poly_cypher;
+pub use poly::poly_cipher;
 mod constants;
+pub use stream::stream_cipher;

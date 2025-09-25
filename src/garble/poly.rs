@@ -1,6 +1,6 @@
+use crate::garble::constants::CHARACTERS;
 use std::collections::HashMap;
 use std::fmt;
-use crate::garble::constants::CHARACTERS;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum Lane {
@@ -23,7 +23,7 @@ impl Lane {
 }
 
 #[derive(Debug)]
-enum CipherError {
+pub enum CipherError {
     InvalidPinLength,
     NonDigitInPin,
     ParseError,
@@ -79,7 +79,8 @@ fn shift_key(pin: &str) -> Result<HashMap<Lane, usize>, CipherError> {
     let pin_sqr = pin_num * pin_num;
 
     // get last 4 digits (least-significant first), fallback to '0' if missing
-    let mut rev = pin_sqr.to_string().chars().rev();
+    let pin_sqr_str = pin_sqr.to_string();
+    let mut rev = pin_sqr_str.chars().rev();
     let a_add = rev.next().unwrap_or('0').to_digit(10).ok_or(CipherError::Internal("a_add"))? as usize;
     let b_add = rev.next().unwrap_or('0').to_digit(10).ok_or(CipherError::Internal("b_add"))? as usize;
     let c_add = rev.next().unwrap_or('0').to_digit(10).ok_or(CipherError::Internal("c_add"))? as usize;
